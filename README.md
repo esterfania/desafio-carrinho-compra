@@ -17,3 +17,7 @@ Neste desafio são abordados:
 - Fake API com JSON Server;
 - Preservar dados do carrinho com localStorage API;
 - Mostrar erros com toastify.
+
+Aplicação após conclusão do desafio:
+
+https://user-images.githubusercontent.com/35200622/113056708-83539100-9182-11eb-9c99-0578dce3791d.mp4
