@@ -33,8 +33,8 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
 
   const addProduct = async (productId: number) => {
     try {
-      const productExists = cart.find((item) => item.id === productId);
-      let newArray: Product[] = [];
+      const updatedCart = [...cart];
+      const productExists = updatedCart.find((item) => item.id === productId);
 
       if (productExists) {
         const stock = await api.get(`/stock/${productId}`);
@@ -42,23 +42,17 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
         const currentAmout = productExists.amount;
 
         if (currentAmout < stockAmount) {
-          newArray = cart.map((i) => {
-            if (i.id === productId) {
-              i.amount += 1;
-            }
-            return i;
-          });
+          productExists.amount += 1;
         } else {
           toast.error('Quantidade solicitada fora de estoque');
           return;
         }
       } else {
-        await api.get(`/products/${productId}`).then((res) => {
-          newArray = [{ ...res.data, amount: 1 }, ...cart];
-        });
+        const newProduct = (await api.get(`/products/${productId}`)).data;
+        updatedCart.push({ ...newProduct, amount: 1 });
       }
-      setCart([...newArray]);
-      setItemOnLocalStorage(newArray);
+      setCart(updatedCart);
+      setItemOnLocalStorage(updatedCart);
     } catch (error) {
       toast.error('Erro na adição do produto');
     }
@@ -66,11 +60,15 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
 
   const removeProduct = (productId: number) => {
     try {
-      const hasProduct = cart.filter((i) => i.id === productId).length;
-      if (hasProduct) {
-        const products = cart.filter((r) => r.id !== productId);
-        setItemOnLocalStorage(products);
-        setCart([...products]);
+      const updatedCart = [...cart];
+      const productIndex = updatedCart.findIndex(
+        (product) => product.id === productId
+      );
+
+      if (productIndex >= 0) {
+        updatedCart.splice(productIndex, 1);
+        setCart(updatedCart);
+        setItemOnLocalStorage(updatedCart);
       } else {
         throw new Error('Erro na remoção do produto');
       }
@@ -84,22 +82,22 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
     amount,
   }: UpdateProductAmount) => {
     try {
-      await api.get(`/stock/${productId}`).then(async (item) => {
-        const stock: Stock = item.data;
-        if (amount <= stock.amount && amount > 0) {
-          const products = cart.map((i) => {
-            if (i.id === productId) {
-              i.amount = amount;
-            }
-            return i;
-          });
-          setCart([...products]);
-          setItemOnLocalStorage(cart);
-        } else {
-          toast.error('Quantidade solicitada fora de estoque');
-          return;
-        }
-      });
+      const stock = await api.get(`/stock/${productId}`);
+      const stockAmount = stock.data.amount;
+      const updatedCart = [...cart];
+      const productExists = updatedCart.find(
+        (product) => product.id === productId
+      );
+
+      if (amount > stockAmount || amount <= 0) {
+        toast.error('Quantidade solicitada fora de estoque');
+        return;
+      }
+      if (productExists) {
+        productExists.amount = amount;
+        setCart(updatedCart);
+        setItemOnLocalStorage(updatedCart);
+      }
     } catch (error) {
       toast.error('Erro na alteração de quantidade do produto');
     }
