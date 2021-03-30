@@ -66,7 +66,8 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
 
   const removeProduct = (productId: number) => {
     try {
-      if (cart.filter((i) => i.id === productId).length) {
+      const hasProduct = cart.filter((i) => i.id === productId).length;
+      if (hasProduct) {
         const products = cart.filter((r) => r.id !== productId);
         setItemOnLocalStorage(products);
         setCart([...products]);
@@ -74,7 +75,7 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
         throw new Error('Erro na remoção do produto');
       }
     } catch (error) {
-      toast.error('Erro na remoção do produto');
+      toast.error(error.message);
     }
   };
 
