@@ -48,8 +48,7 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
               return i;
             });
             setCart([...newArray]);
-            const updatedCart = JSON.stringify(cart);
-            localStorage.setItem('@RocketShoes:cart', updatedCart);
+            setItemOnLocalStorage(newArray);
           } else {
             toast.error('Quantidade solicitada fora de estoque');
             return;
@@ -57,7 +56,7 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
         } else {
           await api.get(`/products/${productId}`).then((res) => {
             const newCart = [{ ...res.data, amount: 1 }, ...cart];
-            localStorage.setItem('@RocketShoes:cart', JSON.stringify(newCart));
+            setItemOnLocalStorage(newCart);
             setCart(newCart);
           });
         }
@@ -71,13 +70,12 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
     try {
       if (cart.filter((i) => i.id === productId).length) {
         const products = cart.filter((r) => r.id !== productId);
-        localStorage.setItem('@RocketShoes:cart', JSON.stringify(products));
+        setItemOnLocalStorage(products);
         setCart([...products]);
       } else {
-        toast.error('Erro na remoção do produto');
-        return;
+        throw new Error('Erro na remoção do produto');
       }
-    } catch {
+    } catch (error) {
       toast.error('Erro na remoção do produto');
     }
   };
@@ -97,8 +95,7 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
             return i;
           });
           setCart([...products]);
-          const updatedCart = JSON.stringify(cart);
-          localStorage.setItem('@RocketShoes:cart', updatedCart);
+          setItemOnLocalStorage(cart);
         } else {
           toast.error('Quantidade solicitada fora de estoque');
           return;
@@ -122,4 +119,8 @@ export function useCart(): CartContextData {
   const context = useContext(CartContext);
 
   return context;
+}
+
+function setItemOnLocalStorage(items: Product[]) {
+  localStorage.setItem('@RocketShoes:cart', JSON.stringify(items));
 }
