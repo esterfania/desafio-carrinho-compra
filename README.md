@@ -18,6 +18,6 @@ Neste desafio são abordados:
 - Preservar dados do carrinho com localStorage API;
 - Mostrar erros com toastify.
 
-Aplicação após conclusão do desafio:
+Resultado final após conclusão do desafio:
 
-https://user-images.githubusercontent.com/35200622/113056708-83539100-9182-11eb-9c99-0578dce3791d.mp4
+![ezgif com-gif-maker](https://user-images.githubusercontent.com/35200622/113057130-0e348b80-9183-11eb-8703-20067ee4e5ea.gif)
