@@ -33,34 +33,32 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
 
   const addProduct = async (productId: number) => {
     try {
-      const isStoraged = cart.map((item) => item.id).includes(productId);
-      await api.get(`/stock/${productId}`).then(async (item) => {
-        const stock: Stock = item.data;
-        if (isStoraged) {
-          const product = cart
-            .filter((r) => r.id === productId)
-            .reduce((i) => i);
-          if (product.amount < stock.amount) {
-            const newArray = cart.map((i) => {
-              if (i.id === productId) {
-                i.amount += 1;
-              }
-              return i;
-            });
-            setCart([...newArray]);
-            setItemOnLocalStorage(newArray);
-          } else {
-            toast.error('Quantidade solicitada fora de estoque');
-            return;
-          }
-        } else {
-          await api.get(`/products/${productId}`).then((res) => {
-            const newCart = [{ ...res.data, amount: 1 }, ...cart];
-            setItemOnLocalStorage(newCart);
-            setCart(newCart);
+      const productExists = cart.find((item) => item.id === productId);
+      let newArray: Product[] = [];
+
+      if (productExists) {
+        const stock = await api.get(`/stock/${productId}`);
+        const stockAmount = stock.data.amount;
+        const currentAmout = productExists.amount;
+
+        if (currentAmout < stockAmount) {
+          newArray = cart.map((i) => {
+            if (i.id === productId) {
+              i.amount += 1;
+            }
+            return i;
           });
+        } else {
+          toast.error('Quantidade solicitada fora de estoque');
+          return;
         }
-      });
+      } else {
+        await api.get(`/products/${productId}`).then((res) => {
+          newArray = [{ ...res.data, amount: 1 }, ...cart];
+        });
+      }
+      setCart([...newArray]);
+      setItemOnLocalStorage(newArray);
     } catch (error) {
       toast.error('Erro na adição do produto');
     }
