@@ -114,7 +114,6 @@ const Cart = (): JSX.Element => {
 
       <footer>
         <button type='button'>Finalizar pedido</button>
-
         <Total>
           <span>TOTAL</span>
           <strong>{total}</strong>
